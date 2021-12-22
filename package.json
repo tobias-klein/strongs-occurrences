@@ -1,0 +1,15 @@
+{
+  "name": "strongs-occurrences",
+  "version": "1.0.0",
+  "description": "A script that generates occurrences for all Strong's numbers",
+  "main": "generate_occurrences.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tobias Klein <npm@tklein.info>",
+  "license": "GPL-2.0+",
+  "dependencies": {
+    "node-sword-interface": "^0.242.0",
+    "strongs": "^1.0.2"
+  }
+}
