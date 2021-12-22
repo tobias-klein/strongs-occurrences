@@ -38,21 +38,24 @@ async function main() {
   }
 
   var occurrenceMap = {};
-  var entryCount = Object.entries(strongs).length;
+  var totalEntryCount = Object.entries(strongs).length;
 
   if (!DEBUG) {
-    console.log(`Generating strongs_occurrences.json for ${entryCount} entries! WARNING: This is a lengthy process.`);
+    console.log(`Generating strongs_occurrences.json for ${totalEntryCount} entries! WARNING: This is a lengthy process.`);
     console.log('');
   }
 
+  var percentageDone = (0).toFixed(2);
+
   for (const [key, object] of Object.entries(strongs)) {
-    process.stdout.write('Getting occurrences for ' + key + ': ');
+    process.stdout.write(`Getting occurrences for ${key} [${count + 1} out of ${totalEntryCount} / ${percentageDone} %]: `);
     var occurrences = await getNumberOfOccurrences(key);
     console.log(occurrences);
 
     occurrenceMap[key] = occurrences;
     count += 1;
 
+    percentageDone = (count / totalEntryCount * 100).toFixed(2);
     if (DEBUG && count >= 2) {
       break;
     }
