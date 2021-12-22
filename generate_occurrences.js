@@ -24,7 +24,7 @@ const nsi = new nodeSwordInterface();
 const DEBUG = false;
 
 async function getNumberOfOccurrences(key) {
-  results = await nsi.getModuleSearchResults('KJV', key, undefined, 'strongsNumber');
+  var results = await nsi.getModuleSearchResults('KJV', key, undefined, 'strongsNumber');
   return results.length;
 }
 
