@@ -33,8 +33,11 @@ async function main() {
 
   var kjvAvailable = nsi.isModuleInUserDir('KJV');
   if (!kjvAvailable) {
-    console.log("KJV is not available - please install it before using this script."); 
-    process.exit(1);
+    process.stdout.write('Installing KJV.');
+    await nsi.installModule('KJV');
+
+    console.log(' Done!');
+    console.log('');
   }
 
   var occurrenceMap = {};
