@@ -33,10 +33,14 @@ async function main() {
 
   var kjvAvailable = nsi.isModuleInUserDir('KJV');
   if (!kjvAvailable) {
-    process.stdout.write('Installing KJV.');
+    process.stdout.write('Updating repository config ... ');
+    await nsi.updateRepositoryConfig();
+    console.log('Done!');
+
+    process.stdout.write('Installing KJV ... ');
     await nsi.installModule('KJV');
 
-    console.log(' Done!');
+    console.log('Done!');
     console.log('');
   }
 
