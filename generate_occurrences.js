@@ -16,7 +16,6 @@
    along with strongs-occurrences. See the file LICENSE.
    If not, see <http://www.gnu.org/licenses/>. */
 
-const strongs = require('strongs');
 const nodeSwordInterface = require('node-sword-interface');
 const fs = require('fs');
 
