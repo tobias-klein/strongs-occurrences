@@ -62,14 +62,20 @@ function getOccurrenceMap() {
     const html = parse(content);
     const wElements = html.querySelectorAll('w');
 
+    let currentVerseStrongsIds = [];
+
     wElements.forEach((w) => {
       let strongsIds = getStrongsIdsFromStrongsElement(w);
 
       strongsIds.forEach((id) => {
-        if (occurrenceMap.hasOwnProperty(id)) {
-          occurrenceMap[id] += 1;
-        } else {
-          occurrenceMap[id] = 1;
+        if (!currentVerseStrongsIds.includes(id)) {
+          if (occurrenceMap.hasOwnProperty(id)) {
+            occurrenceMap[id] += 1;
+          } else {
+            occurrenceMap[id] = 1;
+          }
+
+          currentVerseStrongsIds.push(id);
         }
       });
     });
