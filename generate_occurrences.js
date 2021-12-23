@@ -23,14 +23,107 @@ const fs = require('fs');
 const nsi = new nodeSwordInterface();
 const DEBUG = false;
 
-async function getNumberOfOccurrences(key) {
-  var results = await nsi.getModuleSearchResults('KJV', key, undefined, 'strongsNumber');
-  return results.length;
+function getNormalizedStrongsId(strongsId) {
+  if (strongsId == undefined) {
+    return undefined;
+  }
+
+  var strongsNumber = parseInt(strongsId.substring(1));
+  strongsId = strongsId[0] + strongsNumber;
+  return strongsId;
+}
+
+function getStrongsIdsFromStrongsElement(strongsElement) {
+  var strongsIds = [];
+
+  if (strongsElement) {
+    strongsElement.classList._set.forEach((cls) => {
+      if (cls.startsWith('strong:')) {
+        const strongsId = getNormalizedStrongsId(cls.slice(7));
+        strongsIds.push(strongsId);
+      }
+    });
+  }
+
+  return strongsIds;
+}
+
+function getOccurrenceMap() {
+  var count = 0;
+  var occurrenceMap = {};
+
+  nsi.enableMarkup();
+  var kjvVerses = nsi.getBibleText('KJV');
+
+  const { parse } = require('node-html-parser');
+
+  for (let i = 0; i < kjvVerses.length; i++) {
+    let verse = kjvVerses[i];
+    let content = verse.content;
+    const html = parse(content);
+    const wElements = html.querySelectorAll('w');
+
+    wElements.forEach((w) => {
+      let strongsIds = getStrongsIdsFromStrongsElement(w);
+
+      strongsIds.forEach((id) => {
+        if (occurrenceMap.hasOwnProperty(id)) {
+          occurrenceMap[id] += 1;
+        } else {
+          occurrenceMap[id] = 1;
+        }
+      });
+    });
+
+    count += 1;
+
+    if (DEBUG && count >= 10) {
+      break;
+    }
+  }
+
+  return occurrenceMap;
+}
+
+function getSortedMap(map) {
+  let keys = Object.keys(map);
+  let hKeys = [];
+  let gKeys = [];
+
+  keys.forEach((key) => {
+    let letter = key[0];
+
+    if (letter == 'H') {
+      hKeys.push(key);
+    } else {
+      gKeys.push(key);
+    }
+  });
+
+  hKeys.sort(sortKeys);
+  gKeys.sort(sortKeys);
+
+  let sortedKeys = hKeys;
+  gKeys.forEach((key) => {
+    sortedKeys.push(key);
+  });
+
+  let sortedMap = {};
+  sortedKeys.forEach((key) => {
+    sortedMap[key] = map[key];
+  });
+
+  return sortedMap;
+}
+
+function sortKeys(a, b) {
+  a = Number(a.slice(1));
+  b = Number(b.slice(1));
+
+  return a - b;
 }
 
 async function main() {
-  var count = 0;
-
   var kjvAvailable = nsi.isModuleInUserDir('KJV');
   if (!kjvAvailable) {
     process.stdout.write('Updating repository config ... ');
@@ -44,31 +137,14 @@ async function main() {
     console.log('');
   }
 
-  var occurrenceMap = {};
-  var totalEntryCount = Object.entries(strongs).length;
-
   if (!DEBUG) {
-    console.log(`Generating strongs_occurrences.json for ${totalEntryCount} entries! WARNING: This is a lengthy process.`);
+    console.log(`Generating strongs_occurrences.json!`);
     console.log('');
   }
 
-  var percentageDone = (0).toFixed(2);
-
-  for (const [key, object] of Object.entries(strongs)) {
-    process.stdout.write(`Getting occurrences for ${key} [${count + 1} out of ${totalEntryCount} / ${percentageDone} %]: `);
-    var occurrences = await getNumberOfOccurrences(key);
-    console.log(occurrences);
-
-    occurrenceMap[key] = occurrences;
-    count += 1;
-
-    percentageDone = (count / totalEntryCount * 100).toFixed(2);
-    if (DEBUG && count >= 2) {
-      break;
-    }
-  }
-
-  const occurrencesString = JSON.stringify(occurrenceMap, null, 2);
+  const occurrenceMap = getOccurrenceMap();
+  const sortedOccurrenceMap = getSortedMap(occurrenceMap);
+  const occurrencesString = JSON.stringify(sortedOccurrenceMap, null, 2);
 
   try {
     fs.writeFileSync('strongs_occurrences.json', occurrencesString);

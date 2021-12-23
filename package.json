@@ -8,8 +8,8 @@
   },
   "author": "Tobias Klein <npm@tklein.info>",
   "license": "GPL-2.0+",
-  "dependencies": {
-    "node-sword-interface": "^0.242.0",
-    "strongs": "^1.0.2"
+  "devDependencies": {
+    "node-html-parser": "^5.1.0",
+    "node-sword-interface": "^0.242.0"
   }
 }
